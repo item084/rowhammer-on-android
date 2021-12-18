@@ -10,19 +10,18 @@
 #include <linux/ion.h>
 #include <linux/msm_ion.h>
 #include <linux/time.h>
+#include <linux/vmalloc.h>
 // #include "/home/yuan/projects/drammer/exp/msm/drivers/gpu/ion/ion_priv.h"
 // cd /data/local; rmmod rh; insmod rh.ko; dmesg -c
 
 // dmesg --console-level debug
 
 // #define EXPECTED_ROW_COUNT 16
-#define ROW_NUMBERS 5 * 1024 / 64
+#define ROW_NUMBERS 4 * 1024 / 64
 #define ROW_SIZE 64 * 1024
-#define MAX_NOP 1
-#define REPEAT 1
+#define MAX_NOP 2
 
-struct ion_handle *data;
-struct ion_client *client;
+char* mapping = NULL;
 struct timespec ts;
 
 int init_module(void) {
@@ -30,9 +29,9 @@ int init_module(void) {
     uint offset = 0;
     uint i = 0;
     uint j = 0;
-    uint k = 0;
+    // uint k = 0;
     uint nops = 0;
-    char* mapping = NULL;
+    
     char* h1, * h2, * v;
     volatile char* th1, *th2;
     int sum = 0;
@@ -40,31 +39,58 @@ int init_module(void) {
     unsigned long t1 = 0;
     unsigned long t_all[ROW_NUMBERS];
 
-    client = msm_ion_client_create(-1, "user");
-    data = ion_alloc(client, mapping_size, 0x1000, (0x1 << 30 ), 0);
-    mapping = ion_map_kernel(client, data);
+    // client = msm_ion_client_create(-1, "user");
+    // data = ion_alloc(client, mapping_size, 0x1000, (0x1 << 30 ), 0);
+    // mapping = ion_map_kernel(client, data);
     // printk(KERN_DEBUG "pfn: %ld, phys: %p", vmalloc_to_pfn(mapping), (void *)PFN_PHYS(vmalloc_to_pfn(mapping)));
     // printk(KERN_DEBUG "pfn: %ld, phys: %p", vmalloc_to_pfn(mapping+1), (void *)PFN_PHYS(vmalloc_to_pfn(mapping+1)));
     // printk(KERN_DEBUG "pfn: %ld, phys: %p", vmalloc_to_pfn(mapping+4096), (void *)PFN_PHYS(vmalloc_to_pfn(mapping+4096)));
     // physical page frame number
-    printk(KERN_DEBUG "@@@ Discontinuity check");
+    // mapping = (char*)vmalloc(mapping_size);
+    mapping = (char*)kmalloc(mapping_size, GFP_KERNEL);
+    printk(KERN_DEBUG "@@@ Discontinuity check %p", mapping);
     for (i=0; i<mapping_size/4096-1; i++) {
-        if (vmalloc_to_pfn(mapping+i*4096+4096) != vmalloc_to_pfn(mapping+i*4096)+1)
-            printk(KERN_DEBUG "@@@ Discontinuous %d/%d", i, mapping_size/4096);
+        if (virt_to_phys(mapping+i*4096+4096) / 4096 != virt_to_phys(mapping+i*4096) / 4096 +1) {
+            printk(KERN_DEBUG "@@@ Discontinuous %d/%d %d %d", i, mapping_size/4096, virt_to_phys(mapping+i*4096+4096) / 4096, virt_to_phys(mapping+i*4096) / 4096);
         }
+    }
 
     printk(KERN_DEBUG "### Page size: %ld ...\n", PAGE_SIZE);
+
+    // for (i = 1024; i < 2048; i++) {  // mapping_size/4096-1
+    //     getnstimeofday(&ts);
+    //     t0 = ts.tv_nsec;
+    //     th1 = mapping;
+    //     th2 = mapping + i;
+    //     for (j = 0; j < 1000; j++) {
+    //         for (k = 0; k < 512; k++) {
+    //             th1 = mapping + k;
+    //             *th1;
+    //         }
+    //         *th2;
+    //     }
+    //     getnstimeofday(&ts);
+    //     t1 = ts.tv_nsec;
+    //     t_all[0] = (t1-t0) / 2000000;
+    //     if (t_all[0] > 0) {
+    //         printk(KERN_DEBUG "@@@ %d %ld", i, t_all[0]);
+    //         // return 0;
+    //     }
+    //     // printk(KERN_DEBUG "@@@ %ld", t_all[0]);
+    //     // return 0;
+    // }
+    // return 0;
 
     for (nops = 0; nops < MAX_NOP; nops += 2) {
         printk(KERN_DEBUG "HAMMERING with %d nops\n", nops);
 
         sum = 0;
-        for (k = 0; k < REPEAT; k++) {
         for (offset = 0; offset < ROW_NUMBERS - 2; offset++) {
 
             h1 = mapping + ROW_SIZE * offset;
             v = h1 + ROW_SIZE;
             h2 = v + ROW_SIZE;
+
             memset( h1, 0x00, ROW_SIZE );
             memset( v, 0xFF, ROW_SIZE );
             memset( h2, 0x00, ROW_SIZE );
@@ -98,11 +124,10 @@ int init_module(void) {
             // printk(KERN_DEBUG "@@@ Flipped: %d\n", sum);
         
         }
-        }
         for (i = 0; i < 32; i++) {
              printk(KERN_DEBUG "@@@ time-at %d: %lu", i, t_all[i]);
         }
-        printk(KERN_DEBUG "@@@ Flipped: %d\n", sum / REPEAT);
+        printk(KERN_DEBUG "@@@ Flipped: %d\n", sum);
     }
 
 
@@ -115,7 +140,7 @@ int init_module(void) {
 }
 
 void cleanup_module(void) {
-    ion_unmap_kernel(client, data);
-    ion_free(client, data);
+    // vfree(mapping);
+    kfree(mapping);
     printk(KERN_DEBUG "Goodbye android kernel...\n");
 }

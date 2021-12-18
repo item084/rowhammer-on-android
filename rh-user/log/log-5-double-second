@@ -1,0 +1,20 @@
+adb shell "/data/local/tmp/rh-test"
+Allocation success.
+phys 0x66800000 0
+@@@ Discontinuity check (4096)
+@@@ Discontinuous 255/16384
+@@@ Discontinuous 511/16384
+@@@ Discontinuous 1023/16384
+@@@ Discontinuous 3071/16384
+@@@ Discontinuous 4095/16384
+@@@ Discontinuous 5119/16384
+@@@ Discontinuous 6143/16384
+@@@ Discontinuous 7167/16384
+@@@ Discontinuous 8191/16384
+@@@ Discontinuous 9215/16384
+@@@ Discontinuous 10239/16384
+@@@ Discontinuous 11263/16384
+@@@ Discontinuous 12287/16384
+@@@ Discontinuous 13311/16384
+@@@ Discontinuous 14335/16384
+@@@ Discontinuous 15359/16384

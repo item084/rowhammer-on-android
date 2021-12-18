@@ -4,7 +4,7 @@ def main():
     nops = []
     flips = []
     times = []
-    with open("log-5-nop-5", "r") as lines:
+    with open("log-5-nop", "r") as lines:
         for line in lines:
             if "HAMMERING with" in line:
                 nops.append(int(line.split()[-2])*2)

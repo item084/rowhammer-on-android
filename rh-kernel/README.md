@@ -27,10 +27,6 @@ make hammerhead_defconfig
     - In kernel/timeconst.h, replace if (!defined(@val)) with if (!@val)
     - See [ref](https://patchwork.kernel.org/project/linux-kbuild/patch/1353269117-39917-1-git-send-email-pefoley2@verizon.net/)
 
-1. Gain root permission.
-    - In build/core/main.mkChange, change ro.secure=0
-    - See [ref](https://stackoverflow.com/questions/43679158/how-can-i-compile-an-android-kernel-with-root-permission)
-
 1. Kernel: arch/arm/boot/zImage-dtb is ready
 
 ### Build Android
@@ -49,6 +45,10 @@ export TARGET_PREBUILT_KERNEL=.../msm/arch/arm/boot/zImage-dtb
     - prebuilts/sdk/tools/jack:128
     - prebuilts/sdk/tools/jack-admin:123
     - `HTTP_CODE=$(curl --fail --silent --output $JACK_EXIT --write-out %{http_code} --connect-timeout 5 --noproxy 127.0.0.1:$SERVER_PORT_ADMIN http://127.0.0.1:$SERVER_PORT_ADMIN/$CMD)`
+
+1. Gain root permission.
+    - In build/core/main.mk, change ro.secure=0
+    - See [ref](https://stackoverflow.com/questions/43679158/how-can-i-compile-an-android-kernel-with-root-permission)
 
 1. Install proprietary binaries (See [ref](https://stackoverflow.com/questions/33083512/aosp-6-0-build-for-hammerhead-proprietary-binaries/39927763#39927763))
 

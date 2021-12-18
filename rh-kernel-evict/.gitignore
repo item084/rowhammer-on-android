@@ -1,0 +1,12 @@
+Module.symvers
+modules.order
+rh.mod.c
+rh.mod.o
+rh.o
+rh.ko
+.rh.o.cmd
+.rh.ko.cmd
+.rh.mod.o.cmd
+.rh.mod.o.cmd
+.tmp_versions
+log*
