@@ -1,4 +1,4 @@
-# RowHammer in Smartphones [EECS582 course project]
+# RowHammer in Smartphones
 
 ## Content
 
